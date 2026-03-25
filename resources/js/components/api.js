@@ -31,6 +31,7 @@ const api = {
     getCurrentRate:    () => axios.get('/api/exchange-rates/current').then(r => r.data),
     getRates:          () => axios.get('/api/exchange-rates').then(r => r.data),
     createRate:        (data) => axios.post('/api/exchange-rates', data).then(r => r.data),
+    fetchBcvRate:      () => axios.post('/api/exchange-rates/fetch-bcv').then(r => r.data),
 };
 
 export default api;

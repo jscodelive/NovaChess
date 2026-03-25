@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreExchangeRateRequest;
 use App\Models\ExchangeRate;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 class ExchangeRateController extends Controller
@@ -33,6 +34,19 @@ class ExchangeRateController extends Controller
         if (!$rate) {
             return response()->json(['message' => 'No hay tasa de cambio registrada.'], 404);
         }
+
+        return response()->json($rate);
+    }
+
+    public function fetchBcv(): JsonResponse
+    {
+        $exitCode = Artisan::call('bcv:fetch');
+
+        if ($exitCode !== 0) {
+            return response()->json(['message' => 'No se pudo obtener la tasa del BCV.'], 502);
+        }
+
+        $rate = ExchangeRate::orderBy('date', 'desc')->first();
 
         return response()->json($rate);
     }

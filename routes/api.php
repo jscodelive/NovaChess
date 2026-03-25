@@ -25,4 +25,5 @@ Route::prefix('exchange-rates')->group(function () {
     Route::get('/', [ExchangeRateController::class, 'index']);
     Route::post('/', [ExchangeRateController::class, 'store']);
     Route::get('/current', [ExchangeRateController::class, 'current']);
+    Route::post('/fetch-bcv', [ExchangeRateController::class, 'fetchBcv']);
 });

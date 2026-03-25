@@ -469,6 +469,7 @@ function ProvidersTab() {
 /* ─── RATES MODULE ─── */
 function RatesTab() {
     const [open, setOpen] = useState(false);
+    const [bcvStatus, setBcvStatus] = useState(null);
     const qc = useQueryClient();
     const { data: rate } = useQuery({ queryKey: ['rate'], queryFn: api.getCurrentRate });
     const { data: rates, isLoading } = useQuery({ queryKey: ['rates'], queryFn: api.getRates });
@@ -476,12 +477,26 @@ function RatesTab() {
 
     const mutation = useMutation({ mutationFn: api.createRate, onSuccess: () => { qc.invalidateQueries({ queryKey: ['rate'] }); qc.invalidateQueries({ queryKey: ['rates'] }); setOpen(false); reset(); } });
 
+    const bcvMutation = useMutation({
+        mutationFn: api.fetchBcvRate,
+        onSuccess: () => { qc.invalidateQueries({ queryKey: ['rate'] }); qc.invalidateQueries({ queryKey: ['rates'] }); setBcvStatus('ok'); setTimeout(() => setBcvStatus(null), 3000); },
+        onError: () => { setBcvStatus('error'); setTimeout(() => setBcvStatus(null), 4000); },
+    });
+
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-3 flex-wrap">
                 <h2 className="font-bold text-slate-800 text-lg">Tasas de cambio</h2>
-                <Button onClick={() => setOpen(true)}>+ Registrar tasa</Button>
+                <div className="flex gap-2">
+                    <Button variant="secondary" loading={bcvMutation.isPending} onClick={() => bcvMutation.mutate()}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Actualizar desde BCV
+                    </Button>
+                    <Button onClick={() => setOpen(true)}>+ Manual</Button>
+                </div>
             </div>
+            {bcvStatus === 'ok' && <div className="bg-emerald-50 text-emerald-700 text-sm font-medium px-4 py-2.5 rounded-lg">Tasa del BCV actualizada correctamente.</div>}
+            {bcvStatus === 'error' && <div className="bg-red-50 text-red-700 text-sm font-medium px-4 py-2.5 rounded-lg">No se pudo obtener la tasa del BCV. Verifica la conexión.</div>}
             {rate && (
                 <div className="grid sm:grid-cols-2 gap-4 max-w-md">
                     <div className="bg-blue-50 rounded-xl p-5 text-center">
