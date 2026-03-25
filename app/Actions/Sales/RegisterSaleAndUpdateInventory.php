@@ -2,11 +2,11 @@
 
 namespace App\Actions\Sales;
 
+use App\Exceptions\InsufficientStockException;
 use App\Models\Sale;
 use App\Models\Product;
 use App\Models\AccountsReceivable;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
 class RegisterSaleAndUpdateInventory
 {
@@ -21,7 +21,7 @@ class RegisterSaleAndUpdateInventory
             $product = Product::lockForUpdate()->find($data['product_id']);
 
             if (!$product || $product->stock < $data['quantity_kg']) {
-                throw new Exception("Stock insuficiente para el producto seleccionado.");
+                throw new InsufficientStockException($product->name ?? '');
             }
 
             // Descontar stock
@@ -48,7 +48,7 @@ class RegisterSaleAndUpdateInventory
                     'sale_id'             => $sale->id,
                     'original_amount_usd' => $totalUsd,
                     'balance_usd'         => $totalUsd,
-                    'due_date'            => $data['due_date'] ?? null,
+                    'due_date'            => $data['due_date'] ?? now()->addDays(30)->toDateString(),
                     'status'              => 'pending',
                 ]);
             }
