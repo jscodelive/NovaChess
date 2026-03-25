@@ -21,7 +21,7 @@ class RegisterSaleAndUpdateInventory
             $product = Product::lockForUpdate()->find($data['product_id']);
 
             if (!$product || $product->stock < $data['quantity_kg']) {
-                throw new InsufficientStockException($product->name ?? '');
+                throw new InsufficientStockException($product ? $product->name : '');
             }
 
             // Descontar stock
